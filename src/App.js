@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from "react";
-import List from "./List";
-import Alert from "./Alert";
+import List from "./components/List";
+import Alert from "./components/Alert";
 import { type } from "@testing-library/user-event/dist/type";
+
+const getLocalStorage = () => {
+  let list = localStorage.getItem ( 'list');
+  if(list){
+    return JSON.parse(localStorage.getItem('list'))
+  }
+  else{
+    return[]
+  }
+
+}
 
 function App() {
   const [name, setName] = useState("");
-  const [list, setList] = useState([]);
+  const [list, setList] = useState(getLocalStorage());
   const [isEditing, setIsEditing] = useState(false);
   const [editID, setEditID] = useState(null);
   const [alert, setAlert] = useState({ 
@@ -28,10 +39,10 @@ function App() {
       setName('')
       setEditID(null)
       setIsEditing(false)
-      showAlert(true,'success','item changed')
+      showAlert(true,'success','todo changed')
     }
     else{
-      showAlert(true,'success','item added to the list')
+      showAlert(true,'success','todo added to the list')
       const newItem={
         id:new Date().getTime().toString() ,title:name,
       }
@@ -52,7 +63,7 @@ function App() {
   }
 
   const removeItem = (id) => {
-    showAlert(true,'danger','item removed')
+    showAlert(true,'danger','todo removed')
     setList(list.filter((item) => item.id !== id ))
   }
 
@@ -63,17 +74,20 @@ function App() {
     setName(editedItem.title)
   }
 
+  useEffect(() =>{
+  localStorage.setItem('list', JSON.stringify(list))
+  },[list])
 
   return (
     <section className="section-center">
-      <form className="grocery-form" action="" onSubmit={handleSubmit}>
+      <form className="todo-form" action="" onSubmit={handleSubmit}>
         {alert.show && <Alert {...alert}  removeAlert={showAlert}
         list={list} /> }
-        <h3>grocery bud</h3>
+        <h3>todo list</h3>
         <div className="form-control">
           <input
             type="text"
-            className="grocery"
+            className="todo"
             placeholder="e.g. Study React Hooks"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -84,11 +98,11 @@ function App() {
         </div>
       </form>
       {list.length > 0 && 
-      <div className="grocery-container">
+      <div className="todo-container">
         <List  items={list} 
         removeItem={removeItem}
         editItem={editItem} />
-        <button className="clear-btn" onClick={clearList}>clear items</button>
+        <button className="clear-btn" onClick={clearList}>clear todos</button>
       </div>
     }
     </section>
